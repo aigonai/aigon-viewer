@@ -4,74 +4,36 @@ A lightweight FastAPI markdown viewer for local files.
 
 ## Installation
 
-### Prerequisites: Install uv
-
-[uv](https://github.com/astral-sh/uv) is a fast Python package installer and resolver. `uv tool` installs CLI tools globally in isolated environments, making them available system-wide in your PATH.
+Prerequisite: Install uv
 
 ```bash
-# Install uv (recommended)
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Or install via pip/pipx if you prefer
-pip install uv
-# OR
-pipx install uv
 ```
 
-### Installation Options
-
-**Option 1: Directly from GitHub (recommended)**
-
-Install without cloning:
-
-```bash
-uv tool install git+https://github.com/aigonai/aigon-viewer.git
-```
-
-**Option 2: From GitHub Clone**
-
-Clone the repository and install locally:
-
-```bash
-# Clone the repository
-git clone https://github.com/aigonai/aigon-viewer.git
-cd aigon-viewer
-
-# Install as a global tool
-uv tool install .
-
-# Or use the install script
-./install.sh
-
-# To update an already-installed version
-uv tool install --force .
-```
-
-**Option 3: From PyPI (coming later)**
-
-Once published to PyPI, you'll be able to install directly:
+then install aigon-viewer from PyPi
 
 ```bash
 uv tool install aigon-viewer
 ```
 
+or directly from GitHub
+
+```bash
+uv tool install git+https://github.com/aigonai/aigon-viewer.git
+```
+
 ### Updating
 
-**If installed via Option 1 (Directly from GitHub):**
-```bash
-uv tool install --force git+https://github.com/aigonai/aigon-viewer.git
-```
+From PyPi
 
-**If installed via Option 2 (GitHub Clone):**
-```bash
-cd aigon-viewer
-git pull
-uv tool install --force .
-```
-
-**If installed via Option 3 (PyPI - when available):**
 ```bash
 uv tool install --upgrade aigon-viewer
+```
+
+directly from Github
+
+```bash
+uv tool install --force git+https://github.com/aigonai/aigon-viewer.git
 ```
 
 ## Running the Server
