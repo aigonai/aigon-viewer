@@ -190,9 +190,9 @@ def launch_server(
     env = os.environ.copy()
     env["FILEDB_SERVE_DIR"] = str(serve_dir)
 
-    # Build command - use python -m server to run as module
+    # Build command - use python -m aigon_viewer.server to run as module
     cmd = [
-        sys.executable, "-m", "server",
+        sys.executable, "-m", "aigon_viewer.server",
         "--directory", str(serve_dir),
         "--port", str(actual_port),
         "--host", host

@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Aigon Viewer - Lightweight FastAPI markdown viewer for local files"""
+"""Aigon Viewer - Lightweight FastAPI markdown viewer for local files
+
+(c) Stefan LOESCH 2025-26. All rights reserved.
+"""
 
 from pathlib import Path
 from datetime import datetime
@@ -7,6 +10,15 @@ import os
 from typing import List, Dict, Any, Optional
 import hashlib
 import time
+
+try:
+    from app_shared.vault import vault
+except ImportError:
+    # Standalone mode (no app_shared available)
+    class _OsEnvFallback:
+        def getenv(self, key, default=None):
+            return os.environ.get(key, default)
+    vault = _OsEnvFallback()
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -21,11 +33,7 @@ import asyncio
 import urllib.parse
 
 # Import version information
-try:
-    from .version import __version__ as APP_VERSION
-except ImportError:
-    # Fallback for when running as script directly
-    from version import __version__ as APP_VERSION
+from .version import __version__ as APP_VERSION
 
 # Configuration
 FILEDB_FILE_DIR = None  # Will be set by command line arguments or environment
@@ -166,6 +174,34 @@ def process_mermaid_blocks(content: str) -> str:
 
     return re.sub(pattern, replace_mermaid, content, flags=re.DOTALL)
 
+def ensure_list_newlines(content: str) -> str:
+    """Ensure lists have blank lines before them for proper markdown rendering
+
+    Adds a blank line before:
+    - Unordered lists (lines starting with -, *, +)
+    - Ordered lists (lines starting with digit(s) followed by . or ))
+
+    But only if the previous line is not already blank and not part of a list.
+    """
+    import re
+
+    lines = content.split('\n')
+    result = []
+
+    for i, line in enumerate(lines):
+        # Check if current line starts a list
+        is_list_start = bool(re.match(r'^\s*[-*+]\s+', line) or re.match(r'^\s*\d+[.)]\s+', line))
+
+        if is_list_start and i > 0:
+            prev_line = lines[i-1].strip()
+            # Add blank line if previous line is not blank and not a list item
+            if prev_line and not re.match(r'^[-*+]\s+', prev_line) and not re.match(r'^\d+[.)]\s+', prev_line):
+                result.append('')  # Add blank line
+
+        result.append(line)
+
+    return '\n'.join(result)
+
 def yaml_meta_to_html_table(yaml_meta: dict) -> str:
     """Convert YAML front matter to HTML table
 
@@ -246,7 +282,7 @@ async def get_aigon_files() -> Dict[str, str]:
     if LOCAL_ONLY_MODE:
         return {}
 
-    token = os.getenv("AIGON_API_TOKEN")
+    token = vault.getenv("AIGON_API_TOKEN")
     if not token:
         print("AIGON_API_TOKEN not set, no Aigon files available")
         return {}
@@ -342,7 +378,7 @@ async def fetch_remote_file(url_or_spec: str, version: Optional[int] = None) -> 
             print(f"Fetching Aigon file: {basename} (version: {version or 'latest'})")
 
             # Get token from environment
-            token = os.getenv("AIGON_API_TOKEN")
+            token = vault.getenv("AIGON_API_TOKEN")
             if not token:
                 print("AIGON_API_TOKEN environment variable not set")
                 return None
@@ -554,7 +590,7 @@ async def index(request: Request, config: str = None, source: str = "local"):
 
 async def get_file_versions(basename: str) -> List[Dict[str, Any]]:
     """Get list of available versions for an Aigon file"""
-    token = os.getenv("AIGON_API_TOKEN")
+    token = vault.getenv("AIGON_API_TOKEN")
     if not token:
         return []
 
@@ -647,9 +683,15 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
         try:
             import yaml
             yaml_meta = yaml.safe_load(yaml_content)
-        except (ImportError, Exception):
-            # Fallback to empty if PyYAML not available or parsing fails
-            yaml_meta = {}
+            if yaml_meta is None:
+                yaml_meta = {}
+        except ImportError:
+            yaml_meta = {'_error': 'YAML parser not available', '_details': 'PyYAML is not installed'}
+        except Exception as e:
+            yaml_meta = {'_error': 'Error parsing frontmatter', '_details': str(e)}
+
+    # Ensure lists have proper blank lines before them
+    content = ensure_list_newlines(content)
 
     # Process mermaid blocks before markdown conversion
     content = process_mermaid_blocks(content)
@@ -750,6 +792,9 @@ async def api_file_content(filename: str, source: str = "local"):
         if content is None:
             raise HTTPException(status_code=404, detail="Could not fetch remote file")
 
+        # Ensure lists have proper blank lines before them
+        content = ensure_list_newlines(content)
+
         # Process mermaid blocks before markdown conversion
         content = process_mermaid_blocks(content)
 
@@ -772,6 +817,9 @@ async def api_file_content(filename: str, source: str = "local"):
         # Read file content
         async with aiofiles.open(filepath, 'r', encoding='utf-8') as f:
             content = await f.read()
+
+        # Ensure lists have proper blank lines before them
+        content = ensure_list_newlines(content)
 
         # Process mermaid blocks before markdown conversion
         content = process_mermaid_blocks(content)
@@ -877,11 +925,18 @@ async def api_file_html(filename: str, source: str = "local", version: Optional[
         try:
             import yaml
             yaml_meta = yaml.safe_load(yaml_content)
-        except (ImportError, Exception):
-            yaml_meta = {}
+            if yaml_meta is None:
+                yaml_meta = {}
+        except ImportError:
+            yaml_meta = {'_error': 'YAML parser not available', '_details': 'PyYAML is not installed'}
+        except Exception as e:
+            yaml_meta = {'_error': 'Error parsing frontmatter', '_details': str(e)}
 
     # Generate front matter HTML table
     frontmatter_html = yaml_meta_to_html_table(yaml_meta)
+
+    # Ensure lists have proper blank lines before them
+    content = ensure_list_newlines(content)
 
     # Process mermaid blocks before markdown conversion
     content = process_mermaid_blocks(content)
@@ -1021,7 +1076,7 @@ def main():
     if not args.no_browser:
         threading.Thread(target=open_browser, args=(url,), daemon=True).start()
 
-    uvicorn.run("server:app", host=args.host, port=args.port, reload=False)
+    uvicorn.run("aigon_viewer.server:app", host=args.host, port=args.port, reload=False)
 
 
 if __name__ == "__main__":
