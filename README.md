@@ -25,7 +25,7 @@ pipx install uv
 Install without cloning:
 
 ```bash
-uv tool install git+https://github.com/aigonai/aigonviewer.git
+uv tool install git+https://github.com/aigonai/aigon-viewer.git
 ```
 
 **Option 2: From GitHub Clone**
@@ -34,8 +34,8 @@ Clone the repository and install locally:
 
 ```bash
 # Clone the repository
-git clone https://github.com/aigonai/aigonviewer.git
-cd aigonviewer
+git clone https://github.com/aigonai/aigon-viewer.git
+cd aigon-viewer
 
 # Install as a global tool
 uv tool install .
@@ -52,26 +52,26 @@ uv tool install --force .
 Once published to PyPI, you'll be able to install directly:
 
 ```bash
-uv tool install aigon-viewer-server
+uv tool install aigon-viewer
 ```
 
 ### Updating
 
 **If installed via Option 1 (Directly from GitHub):**
 ```bash
-uv tool install --force git+https://github.com/aigonai/aigonviewer.git
+uv tool install --force git+https://github.com/aigonai/aigon-viewer.git
 ```
 
 **If installed via Option 2 (GitHub Clone):**
 ```bash
-cd aigonviewer
+cd aigon-viewer
 git pull
 uv tool install --force .
 ```
 
 **If installed via Option 3 (PyPI - when available):**
 ```bash
-uv tool install --upgrade aigon-viewer-server
+uv tool install --upgrade aigon-viewer
 ```
 
 ## Running the Server

@@ -1,6 +1,6 @@
 [project]
-name = "aigon-viewer-server"
-version = "0.7.2"
+name = "aigon-viewer"
+version = "0.8.3"
 description = "Standalone markdown viewer server with local and remote file support"
 readme = "README.md"
 requires-python = ">=3.10"
