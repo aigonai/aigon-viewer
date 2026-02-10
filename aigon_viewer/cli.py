@@ -9,13 +9,8 @@ Provides full process management for the Aigon Viewer Server.
 import argparse
 import sys
 
-try:
-    from .process_manager import launch_server, status_server, kill_server
-    from .version import __version__
-except ImportError:
-    # Fallback for direct execution
-    from process_manager import launch_server, status_server, kill_server
-    from version import __version__
+from .process_manager import launch_server, status_server, kill_server
+from .version import __version__
 
 
 def main():

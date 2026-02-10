@@ -33,11 +33,7 @@ import asyncio
 import urllib.parse
 
 # Import version information
-try:
-    from .version import __version__ as APP_VERSION
-except ImportError:
-    # Fallback for when running as script directly
-    from version import __version__ as APP_VERSION
+from .version import __version__ as APP_VERSION
 
 # Configuration
 FILEDB_FILE_DIR = None  # Will be set by command line arguments or environment
@@ -1080,7 +1076,7 @@ def main():
     if not args.no_browser:
         threading.Thread(target=open_browser, args=(url,), daemon=True).start()
 
-    uvicorn.run("server:app", host=args.host, port=args.port, reload=False)
+    uvicorn.run("aigon_viewer.server:app", host=args.host, port=args.port, reload=False)
 
 
 if __name__ == "__main__":
