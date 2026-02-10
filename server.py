@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Aigon Viewer - Lightweight FastAPI markdown viewer for local files"""
+"""Aigon Viewer - Lightweight FastAPI markdown viewer for local files
+
+(c) Stefan LOESCH 2025-26. All rights reserved.
+"""
 
 from pathlib import Path
 from datetime import datetime
@@ -7,6 +10,15 @@ import os
 from typing import List, Dict, Any, Optional
 import hashlib
 import time
+
+try:
+    from app_shared.vault import vault
+except ImportError:
+    # Standalone mode (no app_shared available)
+    class _OsEnvFallback:
+        def getenv(self, key, default=None):
+            return os.environ.get(key, default)
+    vault = _OsEnvFallback()
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -274,7 +286,7 @@ async def get_aigon_files() -> Dict[str, str]:
     if LOCAL_ONLY_MODE:
         return {}
 
-    token = os.getenv("AIGON_API_TOKEN")
+    token = vault.getenv("AIGON_API_TOKEN")
     if not token:
         print("AIGON_API_TOKEN not set, no Aigon files available")
         return {}
@@ -370,7 +382,7 @@ async def fetch_remote_file(url_or_spec: str, version: Optional[int] = None) -> 
             print(f"Fetching Aigon file: {basename} (version: {version or 'latest'})")
 
             # Get token from environment
-            token = os.getenv("AIGON_API_TOKEN")
+            token = vault.getenv("AIGON_API_TOKEN")
             if not token:
                 print("AIGON_API_TOKEN environment variable not set")
                 return None
@@ -582,7 +594,7 @@ async def index(request: Request, config: str = None, source: str = "local"):
 
 async def get_file_versions(basename: str) -> List[Dict[str, Any]]:
     """Get list of available versions for an Aigon file"""
-    token = os.getenv("AIGON_API_TOKEN")
+    token = vault.getenv("AIGON_API_TOKEN")
     if not token:
         return []
 
@@ -675,9 +687,12 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
         try:
             import yaml
             yaml_meta = yaml.safe_load(yaml_content)
-        except (ImportError, Exception):
-            # Fallback to empty if PyYAML not available or parsing fails
-            yaml_meta = {}
+            if yaml_meta is None:
+                yaml_meta = {}
+        except ImportError:
+            yaml_meta = {'_error': 'YAML parser not available', '_details': 'PyYAML is not installed'}
+        except Exception as e:
+            yaml_meta = {'_error': 'Error parsing frontmatter', '_details': str(e)}
 
     # Ensure lists have proper blank lines before them
     content = ensure_list_newlines(content)
@@ -914,8 +929,12 @@ async def api_file_html(filename: str, source: str = "local", version: Optional[
         try:
             import yaml
             yaml_meta = yaml.safe_load(yaml_content)
-        except (ImportError, Exception):
-            yaml_meta = {}
+            if yaml_meta is None:
+                yaml_meta = {}
+        except ImportError:
+            yaml_meta = {'_error': 'YAML parser not available', '_details': 'PyYAML is not installed'}
+        except Exception as e:
+            yaml_meta = {'_error': 'Error parsing frontmatter', '_details': str(e)}
 
     # Generate front matter HTML table
     frontmatter_html = yaml_meta_to_html_table(yaml_meta)

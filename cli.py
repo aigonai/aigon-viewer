@@ -2,6 +2,8 @@
 """CLI entry point for aigonviewer command.
 
 Provides full process management for the Aigon Viewer Server.
+
+(c) Stefan LOESCH 2025-26. All rights reserved.
 """
 
 import argparse
