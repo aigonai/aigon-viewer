@@ -261,22 +261,22 @@ body {
     font-size: 0.9em;
 }
 
-/* Style for note references */
-.markdown-content code.note-ref {
-    font-size: 0.75em !important;
-    color: #95a5a6 !important;
-    background: #f9f9f9 !important;
-    padding: 0.1rem 0.3rem !important;
-}
-
-/* Style for inline note references in regular text */
-.markdown-content .inline-note-ref {
+/* Style for note reference links */
+.markdown-content a.note-ref,
+.markdown-content a.inline-note-ref {
     font-size: 0.75em;
     color: #95a5a6;
     background: #f9f9f9;
     padding: 0.1rem 0.3rem;
     border-radius: 2px;
     font-family: 'Courier New', monospace;
+    text-decoration: none;
+}
+
+.markdown-content a.note-ref:hover,
+.markdown-content a.inline-note-ref:hover {
+    color: #7f8c8d;
+    background: #ecf0f1;
 }
 
 .markdown-content pre {

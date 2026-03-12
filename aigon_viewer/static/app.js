@@ -125,22 +125,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Style note references like [abc1] anywhere in the content
     function styleNoteReferences() {
+        const noteBaseUrl = 'https://a1.aigon.ai/notes/';
+
+        function noteRefLink(id) {
+            return '<a href="' + noteBaseUrl + id + '" class="inline-note-ref" target="_blank">[' + id + ']</a>';
+        }
+
         // First handle code blocks
         const codeElements = document.querySelectorAll('.markdown-content code');
         codeElements.forEach(code => {
             const text = code.textContent.trim();
-            if (text.match(/^\[[a-z0-9]{2,6}\]$/i)) {
-                code.style.fontSize = '0.75em';
-                code.style.color = '#95a5a6';
-                code.style.background = '#f9f9f9';
-                code.style.padding = '0.1rem 0.3rem';
-                code.classList.add('note-ref');
+            const match = text.match(/^\[([a-z0-9]{2,6})\]$/i);
+            if (match) {
+                const link = document.createElement('a');
+                link.href = noteBaseUrl + match[1];
+                link.target = '_blank';
+                link.className = 'note-ref';
+                link.textContent = text;
+                code.parentNode.replaceChild(link, code);
             }
         });
 
         // Also handle text nodes - find [xxxx] patterns and wrap them
+        const contentEl = document.querySelector('.markdown-content');
+        if (!contentEl) return;
         const walker = document.createTreeWalker(
-            document.querySelector('.markdown-content'),
+            contentEl,
             NodeFilter.SHOW_TEXT,
             null,
             false
@@ -149,20 +159,27 @@ document.addEventListener('DOMContentLoaded', () => {
         const textNodes = [];
         let node;
         while (node = walker.nextNode()) {
-            if (node.parentNode.tagName !== 'CODE' && node.parentNode.tagName !== 'PRE') {
+            if (node.parentNode.tagName !== 'CODE' && node.parentNode.tagName !== 'PRE'
+                && node.parentNode.tagName !== 'A') {
                 textNodes.push(node);
             }
         }
 
         textNodes.forEach(textNode => {
             const text = textNode.textContent;
-            // Match both single IDs [abc1] and comma-separated IDs [abc1,def2,ghi3]
             const pattern = /\[([a-z0-9]{2,6}(?:,[a-z0-9]{2,6})*)\]/gi;
             if (pattern.test(text)) {
-                const newHTML = text.replace(/\[([a-z0-9]{2,6}(?:,[a-z0-9]{2,6})*)\]/gi,
-                    '<span class="inline-note-ref">[$1]</span>');
+                const newHTML = text.replace(/\[([a-z0-9]{2,6})\]/gi,
+                    function(match, id) { return noteRefLink(id); });
+                // Handle comma-separated: [abc,def] -> links for each
+                const finalHTML = newHTML.replace(/\[([a-z0-9]{2,6}(?:,[a-z0-9]{2,6})+)\]/gi,
+                    function(match, ids) {
+                        return '[' + ids.split(',').map(function(id) {
+                            return '<a href="' + noteBaseUrl + id.trim() + '" class="inline-note-ref" target="_blank">' + id.trim() + '</a>';
+                        }).join(',') + ']';
+                    });
                 const wrapper = document.createElement('span');
-                wrapper.innerHTML = newHTML;
+                wrapper.innerHTML = finalHTML;
                 textNode.parentNode.replaceChild(wrapper, textNode);
             }
         });
