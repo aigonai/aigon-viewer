@@ -6,12 +6,12 @@ Each server instance is tracked by a PID file in a platform-specific location.
 """
 
 import os
-import sys
-import subprocess
-import signal
-import time
-import socket
 import platform
+import signal
+import socket
+import subprocess
+import sys
+import time
 from pathlib import Path
 
 
@@ -207,12 +207,12 @@ def launch_server(
 
     if foreground:
         # Run in foreground
-        print(f"🚀 Starting Aigon Viewer Server...")
+        print("🚀 Starting Aigon Viewer Server...")
         print(f"📁 Serving: {serve_dir}")
         print(f"🌐 URL: http://{host}:{actual_port}")
-        print(f"")
-        print(f"Press Ctrl+C to stop the server")
-        print(f"")
+        print("")
+        print("Press Ctrl+C to stop the server")
+        print("")
 
         try:
             subprocess.run(cmd, env=env, check=True)
@@ -225,7 +225,7 @@ def launch_server(
             return None
     else:
         # Run in background
-        print(f"🚀 Starting Aigon Viewer Server in background...")
+        print("🚀 Starting Aigon Viewer Server in background...")
         print(f"📁 Serving: {serve_dir}")
         print(f"🌐 URL: http://{host}:{actual_port}")
 
@@ -255,20 +255,20 @@ def launch_server(
 
             # Check if process is still running
             if process.poll() is not None:
-                print(f"❌ Server failed to start", file=sys.stderr)
+                print("❌ Server failed to start", file=sys.stderr)
                 # Read and display stderr
                 try:
                     with open(stderr_path, 'r') as f:
                         stderr_output = f.read()
                         if stderr_output:
                             print(stderr_output, file=sys.stderr)
-                except:
+                except OSError:
                     pass
                 finally:
                     # Clean up temp file
                     try:
                         os.unlink(stderr_path)
-                    except:
+                    except OSError:
                         pass
                 pid_file.unlink()
                 return None
@@ -276,13 +276,13 @@ def launch_server(
             # Clean up temp file if server started successfully
             try:
                 os.unlink(stderr_path)
-            except:
+            except OSError:
                 pass
 
             # Open browser (unless --no-browser specified)
             if not no_browser:
                 url = f"http://{host}:{actual_port}"
-                print(f"🌍 Opening browser...")
+                print("🌍 Opening browser...")
                 # Use platform-specific browser opening
                 if platform.system() == "Darwin":  # macOS
                     subprocess.run(["open", url], check=False)
@@ -291,8 +291,8 @@ def launch_server(
                 else:  # Linux and others
                     subprocess.run(["xdg-open", url], check=False)
 
-            print(f"✅ Server running in background")
-            print(f"💡 Use 'aigonviewer kill' to stop it")
+            print("✅ Server running in background")
+            print("💡 Use 'aigonviewer kill' to stop it")
 
             return (actual_port, process.pid)
 
@@ -322,7 +322,7 @@ def status_server(directory: str = None):
     pid_files = list(pid_dir.glob("fileserver.*.pid"))
 
     if not pid_files:
-        print(f"⚠️  No viewers running")
+        print("⚠️  No viewers running")
         return []
 
     # Check each PID file
@@ -359,7 +359,7 @@ def status_server(directory: str = None):
         if stale_files:
             print(f"⚠️  No viewers running (cleaned up {len(stale_files)} stale PID file(s))")
         else:
-            print(f"⚠️  No viewers running")
+            print("⚠️  No viewers running")
         return []
 
 
@@ -395,7 +395,7 @@ def kill_server(directory: str = None, port: int = None, kill_all: bool = False)
         if port:
             print(f"⚠️  No viewer running on port {port}")
         else:
-            print(f"⚠️  No viewers running")
+            print("⚠️  No viewers running")
         return 0
 
     # Kill each process
@@ -423,7 +423,7 @@ def kill_server(directory: str = None, port: int = None, kill_all: bool = False)
 
                 # Check if still running, force kill if needed
                 if is_process_running(pid):
-                    print(f"⚠️  Process still running, force killing...")
+                    print("⚠️  Process still running, force killing...")
                     os.kill(pid, signal.SIGKILL)
                     time.sleep(0.5)
 
