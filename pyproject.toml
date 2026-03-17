@@ -20,6 +20,35 @@ dependencies = [
 aigonviewer = "aigon_viewer.cli:main"
 aigonviewer_base = "aigon_viewer.server:main"
 
+[dependency-groups]
+dev = [
+    "ruff>=0.11.0",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+external = [
+    "VERSION_SYNC",        # structural_lint.py
+]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes (unused imports, undefined names)
+    "I",      # isort (import sorting)
+    "B",      # flake8-bugbear (common pitfalls)
+]
+ignore = [
+    "E501",   # line length (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["aigon_viewer"]
+
+[tool.ruff.format]
+quote-style = "double"
