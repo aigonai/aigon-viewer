@@ -4,12 +4,12 @@
 (c) Stefan LOESCH 2025-26. All rights reserved.
 """
 
-from pathlib import Path
-from datetime import datetime
-import os
-from typing import List, Dict, Any, Optional
 import hashlib
+import os
 import time
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     from app_shared.vault import vault
@@ -20,17 +20,16 @@ except ImportError:
             return os.environ.get(key, default)
     vault = _OsEnvFallback()
 
+import urllib.parse
+
+import aiofiles
+import httpx
+import markdown
+import uvicorn
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import markdown
-from markdown.extensions import fenced_code, tables, nl2br, sane_lists, codehilite, meta, toc
-import aiofiles
-import uvicorn
-import httpx
-import asyncio
-import urllib.parse
 
 # Import version information
 from .version import __version__ as APP_VERSION
@@ -75,7 +74,7 @@ app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Configure markdown processor with extensions
 try:
-    import pymdownx.tilde
+    import pymdownx.tilde  # noqa: F401
     # Use pymdownx extensions if available for enhanced features
     md = markdown.Markdown(
         extensions=[
@@ -322,7 +321,7 @@ def load_remote_urls() -> Dict[str, str]:
     if remote_file.exists():
         try:
             with open(remote_file, 'r') as f:
-                for line_num, line in enumerate(f, 1):
+                for _line_num, line in enumerate(f, 1):
                     line = line.strip()
 
                     if not line or line.startswith('#'):
@@ -543,7 +542,7 @@ async def index(request: Request, config: str = None, source: str = "local"):
                 files.append(f)
 
         # Add files that only exist remotely (in remote_urls but not locally)
-        for filename_base, url in remote_urls.items():
+        for filename_base, _url in remote_urls.items():
             filename_md = f"{filename_base}.md"
             # Check if this file is already in our list
             if not any(f['name'] == filename_md for f in files):
@@ -993,7 +992,7 @@ def initialize_directories(directory: str):
         print(f"📋 Config file found: {config_file}")
         configs = load_configurations()
         if configs:
-            print(f"📚 Categories loaded from _config.toml:")
+            print("📚 Categories loaded from _config.toml:")
             for category, files in configs.items():
                 print(f"   - {category}: {len(files)} files")
         else:

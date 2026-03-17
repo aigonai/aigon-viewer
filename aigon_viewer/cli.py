@@ -9,7 +9,7 @@ Provides full process management for the Aigon Viewer Server.
 import argparse
 import sys
 
-from .process_manager import launch_server, status_server, kill_server
+from .process_manager import kill_server, launch_server, status_server
 from .version import __version__
 
 
@@ -182,7 +182,7 @@ For simple server execution without process management, use:
             sys.exit(0)
 
     elif args.command == 'status':
-        viewers = status_server(directory=args.directory)
+        status_server(directory=args.directory)
         # Always exit 0 - "no viewers running" is not an error
         sys.exit(0)
 
