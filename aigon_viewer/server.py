@@ -98,6 +98,7 @@ try:
             'pymdownx.emoji',  # For emoji support
             'pymdownx.superfences',
             'pymdownx.inlinehilite',
+            'pymdownx.arithmatex',
         ],
         extension_configs={
             'markdown.extensions.codehilite': {
@@ -106,7 +107,10 @@ try:
                 'linenums': False,
                 'guess_lang': True,
                 'noclasses': False,
-            }
+            },
+            'pymdownx.arithmatex': {
+                'generic': True,
+            },
         }
     )
 except ImportError:
@@ -695,12 +699,6 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
 
     # Process mermaid blocks before markdown conversion
     content = process_mermaid_blocks(content)
-
-    # Protect math blocks from markdown mangling (underscores → emphasis, etc.)
-    math_enabled = bool(yaml_meta.get("math")) if yaml_meta else False
-    if math_enabled:
-        content = re.sub(r'\$\$(.*?)\$\$', r'<div class="math">\1</div>', content, flags=re.DOTALL)
-        content = re.sub(r'(?<!\$)\$(?!\$)(.*?)\$', r'<span class="math">\1</span>', content)
 
     # Convert markdown to HTML (without YAML front matter)
     html_content = md.convert(content)

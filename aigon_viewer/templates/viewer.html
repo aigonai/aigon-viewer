@@ -185,10 +185,8 @@ window.refreshViewer = async function() {
             }
 
             // Re-render KaTeX math after content update
-            if (typeof katex !== 'undefined') {
-                document.querySelectorAll('.math').forEach(function(el) {
-                    katex.render(el.textContent, el, {displayMode: el.tagName === 'DIV', throwOnError: false});
-                });
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.getElementById('markdown-content'), {delimiters: [{left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true}]});
             }
 
             // Re-add copy button functionality after content update

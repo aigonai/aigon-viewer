@@ -13,8 +13,9 @@
     </script>
     {% if math_enabled %}
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"
-        onload="document.querySelectorAll('.math').forEach(function(el){katex.render(el.textContent,el,{displayMode:el.tagName==='DIV',throwOnError:false})})"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters: [{left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true}]})"></script>
     {% endif %}
 </head>
 <body>
