@@ -184,6 +184,13 @@ window.refreshViewer = async function() {
                 mermaid.init(undefined, document.querySelectorAll('.mermaid'));
             }
 
+            // Re-render KaTeX math after content update
+            if (typeof katex !== 'undefined') {
+                document.querySelectorAll('.math').forEach(function(el) {
+                    katex.render(el.textContent, el, {displayMode: el.tagName === 'DIV', throwOnError: false});
+                });
+            }
+
             // Re-add copy button functionality after content update
             if (window.setupCopyButtons) {
                 window.setupCopyButtons();

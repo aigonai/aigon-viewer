@@ -581,6 +581,7 @@ async def index(request: Request, config: str = None, source: str = "local"):
             "configurations": configurations,
             "selected_config": config,
             "selected_source": source,
+            "math_enabled": False,
             "refresh_interval": REFRESH_INTERVAL,
             "app_version": APP_VERSION,
             "local_only": LOCAL_ONLY_MODE
@@ -695,6 +696,12 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
     # Process mermaid blocks before markdown conversion
     content = process_mermaid_blocks(content)
 
+    # Protect math blocks from markdown mangling (underscores → emphasis, etc.)
+    math_enabled = bool(yaml_meta.get("math")) if yaml_meta else False
+    if math_enabled:
+        content = re.sub(r'\$\$(.*?)\$\$', r'<div class="math">\1</div>', content, flags=re.DOTALL)
+        content = re.sub(r'(?<!\$)\$(?!\$)(.*?)\$', r'<span class="math">\1</span>', content)
+
     # Convert markdown to HTML (without YAML front matter)
     html_content = md.convert(content)
 
@@ -752,6 +759,7 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
             "versions": versions,
             "toc_headings": toc_headings,
             "yaml_meta": yaml_meta,
+            "math_enabled": bool(yaml_meta.get("math")) if yaml_meta else False,
             "refresh_interval": REFRESH_INTERVAL,
             "app_version": APP_VERSION,
             "local_only": LOCAL_ONLY_MODE

@@ -11,6 +11,11 @@
     <script>
         mermaid.initialize({ startOnLoad: true });
     </script>
+    {% if math_enabled %}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js"
+        onload="document.querySelectorAll('.math').forEach(function(el){katex.render(el.textContent,el,{displayMode:el.tagName==='DIV',throwOnError:false})})"></script>
+    {% endif %}
 </head>
 <body>
     <header class="fixed-header {% if selected_source %}source-{{ selected_source }}{% elif source %}source-{{ source }}{% else %}source-local{% endif %}">
