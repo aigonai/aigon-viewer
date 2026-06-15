@@ -574,9 +574,9 @@ async def index(request: Request, config: str = None, source: str = "local"):
     print(f"Final file count: {len(files)}")
 
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
-            "request": request,
             "files": files,
             "configurations": configurations,
             "selected_config": config,
@@ -584,8 +584,8 @@ async def index(request: Request, config: str = None, source: str = "local"):
             "math_enabled": False,
             "refresh_interval": REFRESH_INTERVAL,
             "app_version": APP_VERSION,
-            "local_only": LOCAL_ONLY_MODE
-        }
+            "local_only": LOCAL_ONLY_MODE,
+        },
     )
 
 async def get_file_versions(basename: str) -> List[Dict[str, Any]]:
@@ -748,9 +748,9 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
         versions = await get_file_versions(filename_base)
 
     return templates.TemplateResponse(
+        request,
         "viewer.html",
         {
-            "request": request,
             "filename": filename,
             "file_info": file_info,
             "content": html_content,
@@ -762,8 +762,8 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
             "math_enabled": bool(yaml_meta.get("math")) if yaml_meta else False,
             "refresh_interval": REFRESH_INTERVAL,
             "app_version": APP_VERSION,
-            "local_only": LOCAL_ONLY_MODE
-        }
+            "local_only": LOCAL_ONLY_MODE,
+        },
     )
 
 @app.get("/api/files", response_class=JSONResponse)
