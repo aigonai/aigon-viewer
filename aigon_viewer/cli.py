@@ -17,7 +17,7 @@ def main():
     """Main CLI entry point for aigonviewer command."""
     parser = argparse.ArgumentParser(
         prog='aigonviewer',
-        description='Aigon Viewer Server - Markdown viewer with process management',
+        description=f'Aigon Viewer Server v{__version__} - Markdown viewer with process management',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -53,7 +53,8 @@ For simple server execution without process management, use:
     # Launch subcommand
     launch_parser = subparsers.add_parser(
         'launch',
-        help='Launch viewer server in background or foreground'
+        help='Launch viewer server in background or foreground',
+        description=f'Aigon Viewer v{__version__} — launch server',
     )
     launch_parser.add_argument(
         'directory',

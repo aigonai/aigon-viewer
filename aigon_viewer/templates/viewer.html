@@ -184,6 +184,11 @@ window.refreshViewer = async function() {
                 mermaid.init(undefined, document.querySelectorAll('.mermaid'));
             }
 
+            // Re-render KaTeX math after content update
+            if (typeof renderMathInElement !== 'undefined') {
+                renderMathInElement(document.getElementById('markdown-content'), {delimiters: [{left: '\\(', right: '\\)', display: false}, {left: '\\[', right: '\\]', display: true}]});
+            }
+
             // Re-add copy button functionality after content update
             if (window.setupCopyButtons) {
                 window.setupCopyButtons();

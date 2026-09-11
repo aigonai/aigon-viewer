@@ -98,6 +98,7 @@ try:
             'pymdownx.emoji',  # For emoji support
             'pymdownx.superfences',
             'pymdownx.inlinehilite',
+            'pymdownx.arithmatex',
         ],
         extension_configs={
             'markdown.extensions.codehilite': {
@@ -106,7 +107,10 @@ try:
                 'linenums': False,
                 'guess_lang': True,
                 'noclasses': False,
-            }
+            },
+            'pymdownx.arithmatex': {
+                'generic': True,
+            },
         }
     )
 except ImportError:
@@ -574,17 +578,18 @@ async def index(request: Request, config: str = None, source: str = "local"):
     print(f"Final file count: {len(files)}")
 
     return templates.TemplateResponse(
+        request,
         "index.html",
         {
-            "request": request,
             "files": files,
             "configurations": configurations,
             "selected_config": config,
             "selected_source": source,
+            "math_enabled": False,
             "refresh_interval": REFRESH_INTERVAL,
             "app_version": APP_VERSION,
-            "local_only": LOCAL_ONLY_MODE
-        }
+            "local_only": LOCAL_ONLY_MODE,
+        },
     )
 
 async def get_file_versions(basename: str) -> List[Dict[str, Any]]:
@@ -741,9 +746,9 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
         versions = await get_file_versions(filename_base)
 
     return templates.TemplateResponse(
+        request,
         "viewer.html",
         {
-            "request": request,
             "filename": filename,
             "file_info": file_info,
             "content": html_content,
@@ -752,10 +757,11 @@ async def view_file(request: Request, filename: str, source: str = "local", vers
             "versions": versions,
             "toc_headings": toc_headings,
             "yaml_meta": yaml_meta,
+            "math_enabled": bool(yaml_meta.get("math")) if yaml_meta else False,
             "refresh_interval": REFRESH_INTERVAL,
             "app_version": APP_VERSION,
-            "local_only": LOCAL_ONLY_MODE
-        }
+            "local_only": LOCAL_ONLY_MODE,
+        },
     )
 
 @app.get("/api/files", response_class=JSONResponse)
